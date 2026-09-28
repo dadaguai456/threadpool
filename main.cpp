@@ -72,8 +72,27 @@ int main() {
 
 	ThreadPool pool(4);
 
-	auto res1 = pool.enqueue([](int a, int b,int c) {return a * b + c; }, 2, 3, 4);
-	cout << res1.get() << endl;
+	cout << "开始压测" << endl;
+
+	auto start = chrono::high_resolution_clock::now();
+	vector<future<int>> results;
+	for (int i = 0; i < 100000; i++)
+	{
+		results.emplace_back(pool.enqueue([i] {return i * i; }));
+	}
+
+	for (auto& res : results)
+	{
+		res.get();
+	}
+
+	auto end = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+
+	cout << "===压测结果===" << endl;
+	cout << "线程数:4" << endl;
+	cout << "任务数:100000" << endl;
+	cout << "总耗时:" << duration << "ms" << endl;
 
 	return 0;
 }
